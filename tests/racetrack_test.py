@@ -21,7 +21,7 @@ def racetrack_test1() -> bool:
     assert racetrack_.get_square(-1, 6) == enums.Square.GRASS
 
     for _ in range(10):
-        x, y = racetrack_.draw_start_position()
+        x, y = racetrack_.get_a_start_position()
         print(f"start position = ({x}, {y})")
 
     return True

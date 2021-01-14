@@ -6,3 +6,4 @@ class Square(enum.IntEnum):
     GRASS = 1
     START = 2
     END = 3
+    CAR = 4
