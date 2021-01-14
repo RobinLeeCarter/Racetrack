@@ -12,7 +12,7 @@ rng: np.random.Generator = np.random.default_rng()
 
 def trajectory_test() -> bool:
     racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, rng)
-    trajectory_ = trajectory.Trajectory(racetrack_)
+    trajectory_ = trajectory.Trajectory(racetrack_, verbose=True)
     behaviour_ = behaviour_policy.BehaviourPolicy(rng)
 
     # a = action.Action(ax=1, ay=1)

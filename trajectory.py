@@ -11,8 +11,10 @@ import reward_state_action
 
 
 class Trajectory:
-    def __init__(self, racetrack_: racetrack.RaceTrack):
+    def __init__(self, racetrack_: racetrack.RaceTrack, verbose: bool = False):
         self.racetrack: racetrack.RaceTrack = racetrack_
+        self.verbose: bool = verbose
+
         self.max_y: int = self.racetrack.track.shape[0]
         self.max_x: int = self.racetrack.track.shape[1]
         self.trace: trace.Trace = trace.Trace(self.racetrack)
@@ -53,8 +55,9 @@ class Trajectory:
             self.termination()
         elif square == enums.Square.GRASS:
             # failure, move back to start line
-            print(f"Grass at {x}, {y}")
-            self.trace.output()
+            if self.verbose:
+                print(f"Grass at {x}, {y}")
+                self.trace.output()
 
             self.current.reward = -1.0
             x, y = self.racetrack.get_a_start_position()
@@ -69,7 +72,8 @@ class Trajectory:
             self.trace.mark(self.current.state)
 
     def termination(self):
-        self.trace.output()
+        if self.verbose:
+            self.trace.output()
         self.list.append(self.current)
         self.is_terminated = True
 
