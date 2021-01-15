@@ -14,7 +14,8 @@ class OffPolicyMcControl:
                  actions_shape: tuple,
                  behaviour_policy: policy.RandomPolicy,
                  target_policy: policy.DeterministicPolicy,
-                 gamma: float = 1.0
+                 gamma: float = 1.0,
+                 verbose: bool = False
                  ):
         self.racetrack = racetrack_
         self.states_shape = states_shape
@@ -22,6 +23,7 @@ class OffPolicyMcControl:
         self.behaviour_policy = behaviour_policy
         self.target_policy = target_policy
         self.gamma = gamma
+        self.verbose = verbose
 
         self.Q: np.ndarray = np.zeros(shape=states_shape + actions_shape, dtype=float)
         self.C: np.ndarray = np.zeros(shape=self.Q.shape, dtype=float)
@@ -29,7 +31,8 @@ class OffPolicyMcControl:
 
     def initialise_target_policy(self):
         for x in range(self.states_shape[0]):
-            # print(f"x = {x}")
+            if self.verbose:
+                print(f"x = {x}")
             for y in range(self.states_shape[1]):
                 for vx in range(self.states_shape[2]):
                     for vy in range(self.states_shape[3]):
@@ -38,8 +41,10 @@ class OffPolicyMcControl:
 
     # noinspection PyPep8Naming
     def run(self):
-        cont: bool = True
-        while cont:
+        i: int = 0
+        while i <= 100:
+            if self.verbose:
+                print(f"iteration = {i}")
             trajectory_ = trajectory.Trajectory(self.racetrack)
             trajectory_.generate(self.behaviour_policy)
             G: float = 0.0

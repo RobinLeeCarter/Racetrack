@@ -30,7 +30,8 @@ class Controller:
                 self.states_shape,
                 self.actions_shape,
                 self.behaviour_policy,
-                self.target_policy
+                self.target_policy,
+                verbose=self.verbose
             )
 
         # self.generate_trajectory()
@@ -42,12 +43,4 @@ class Controller:
         # self.policy = np.zeros(shape=self.states.shape, dtype=float)
 
     def run(self):
-        i: int = 0
-        cont: bool = True
-
-        while cont:
-            delta: float = 0.0
-            cont = False
-
-    def generate_trajectory(self):
-        pass
+        self.algorithm_.run()
