@@ -3,6 +3,8 @@ from typing import Optional, List
 import numpy as np
 
 import enums
+import constants
+
 import racetrack
 import action
 import state
@@ -78,8 +80,8 @@ class Trajectory:
         self.is_terminated = True
 
     def velocity_rules(self, vx: int, vy: int) -> tuple:
-        vx = self.max_speed(vx)
-        vy = self.max_speed(vy)
+        vx = self.velocity_bounds(vx)
+        vy = self.velocity_bounds(vy)
 
         if vx == 0 and vy == 0:
             prev_vx = self.current.state.vx
@@ -99,10 +101,10 @@ class Trajectory:
 
         return vx, vy
 
-    def max_speed(self, v: int) -> int:
-        if v > 5:
-            return 5
-        elif v < -5:
-            return -5
+    def velocity_bounds(self, v: int) -> int:
+        if v > constants.MAX_VELOCITY:
+            return constants.MAX_VELOCITY
+        elif v < constants.MIN_VELOCITY:
+            return constants.MIN_VELOCITY
         else:
             return v

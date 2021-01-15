@@ -1,22 +1,24 @@
-from typing import List
-
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import figure
 
-import utils
+import constants
+
 import tracks
-import behaviour_policy
+import policy
 import racetrack
 
 
 class Controller:
     def __init__(self, verbose: bool = False):
         self.verbose: bool = verbose
-        self.rng: np.random.Generator = np.random.default_rng()
-        self.behaviour: behaviour_policy.BehaviourPolicy = behaviour_policy.BehaviourPolicy(self.rng)
-        self.racetrack: racetrack.RaceTrack(tracks.TRACK_1, self.rng)
 
+        self.rng: np.random.Generator = np.random.default_rng()
+        self.racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, self.rng)
+        self.states_shape = self.racetrack_.track.shape + (constants.MAX_VELOCITY+1, constants.MAX_VELOCITY+1)
+
+        self.behaviour: policy.RandomPolicy = policy.RandomPolicy(self.rng)
+        self.target: policy.TargetPolicy = policy.TargetPolicy(self.states_shape)
+
+        self.generate_trajectory()
         # hyperparameters
 
         # self.states = np.arange(101)
@@ -33,4 +35,4 @@ class Controller:
             cont = False
 
     def generate_trajectory(self):
-
+        pass

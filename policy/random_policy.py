@@ -1,9 +1,11 @@
 import numpy as np
 
 import action
+import state
+import policy
 
 
-class BehaviourPolicy:
+class RandomPolicy(policy.Policy):
     # fully random
     def __init__(self, rng: np.random.Generator):
         self.rng: np.random.Generator = rng
@@ -20,5 +22,5 @@ class BehaviourPolicy:
             self.actions[iy, ix] = action.Action(ax, ay)
         self.actions_flattened = self.actions.flatten()
 
-    def draw_action(self) -> action.Action:
+    def get_action(self, state_: state.State) -> action.Action:
         return self.rng.choice(self.actions_flattened)
