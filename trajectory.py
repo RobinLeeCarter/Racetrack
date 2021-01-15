@@ -10,6 +10,7 @@ import action
 import state
 import trace
 import reward_state_action
+import policy
 
 
 class Trajectory:
@@ -21,7 +22,7 @@ class Trajectory:
         self.max_x: int = self.racetrack.track.shape[1]
         self.trace: trace.Trace = trace.Trace(self.racetrack)
 
-        self.list: List[reward_state_action.RewardStateAction] = []
+        self.episode: List[reward_state_action.RewardStateAction] = []
         self.is_terminated: bool = False
 
         self.current: reward_state_action.RewardStateAction = reward_state_action.RewardStateAction(None, None, None)
@@ -31,12 +32,18 @@ class Trajectory:
         # get start position and set state
         x, y = self.racetrack.get_a_start_position()
         self.current.state = state.State(x, y)
-        self.trace.mark(self.current.state)
+        if self.verbose:
+            self.trace.mark(self.current.state)
+
+    def generate(self, policy_: policy.Policy):
+        while not self.is_terminated:
+            action_ = policy_.get_action(self.current.state)
+            self.apply_action(action_)
 
     def apply_action(self, action_: action.Action):
         # record in list
         self.current.action = action_
-        self.list.append(self.current)
+        self.episode.append(self.current)
 
         # apply acceleration to velocity
         vx = self.current.state.vx + action_.ax
@@ -66,17 +73,19 @@ class Trajectory:
             vx, vy = 0, 0
             self.current.state = state.State(x, y, vx, vy)
             self.trace.start()
-            self.trace.mark(self.current.state)
+            if self.verbose:
+                self.trace.mark(self.current.state)
         else:
             # TRACK or START so continue
             self.current.reward = -1.0
             self.current.state = state.State(x, y, vx, vy)
-            self.trace.mark(self.current.state)
+            if self.verbose:
+                self.trace.mark(self.current.state)
 
     def termination(self):
         if self.verbose:
             self.output()
-        self.list.append(self.current)
+        self.episode.append(self.current)
         self.is_terminated = True
 
     def output(self):

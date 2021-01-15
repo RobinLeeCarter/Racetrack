@@ -1,20 +1,17 @@
 import numpy as np
 
-# import enums
 import racetrack
 import tracks
 import trajectory
 import policy
-
-# import action
 
 rng: np.random.Generator = np.random.default_rng()
 
 
 def trajectory_test() -> bool:
     racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, rng)
-    behaviour_ = policy.RandomPolicy(rng)
-    trajectory_ = trajectory.Trajectory(racetrack_, verbose=False)
+    behaviour_ = policy.RandomPolicy(rng, actions_shape=(3, 3))
+    trajectory_ = trajectory.Trajectory(racetrack_, verbose=True)
 
     # a = action.Action(ax=1, ay=1)
     t = 0

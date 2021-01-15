@@ -13,6 +13,7 @@ class RandomPolicy(policy.Policy):
         self.actions: np.ndarray = np.empty(shape=actions_shape, dtype=action.Action)
         # self.p: np.ndarray = np.zeros(shape=self.action_shape, dtype=float)
         # self.p[:, :] = 1.0/9.0
+        self.p = 1.0/self.actions.size
 
         for index, _ in np.ndenumerate(self.actions):
             iy = index[0]
@@ -24,3 +25,6 @@ class RandomPolicy(policy.Policy):
 
     def get_action(self, state_: state.State) -> action.Action:
         return self.rng.choice(self.actions_flattened)
+
+    def get_probability(self, action_: action.Action, state_: state.State) -> float:
+        return self.p

@@ -16,3 +16,7 @@ class State:
 
     # terminal
     is_terminal: bool = False
+
+    @property
+    def tuple(self) -> tuple:
+        return self.x, self.y, self.vx, self.vy

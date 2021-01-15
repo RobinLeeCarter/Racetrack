@@ -26,6 +26,7 @@ class Controller:
         self.behaviour_policy: policy.RandomPolicy = policy.RandomPolicy(self.rng, self.actions_shape)
         self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.states_shape)
         self.algorithm_: off_policy_mc_control.OffPolicyMcControl = off_policy_mc_control.OffPolicyMcControl(
+                self.racetrack_,
                 self.states_shape,
                 self.actions_shape,
                 self.behaviour_policy,

@@ -8,3 +8,7 @@ class Action:
     # acceleration
     ax: int = 0     # -1 <= ax <= +1
     ay: int = 0     # -1 <= ay <= +1
+
+    @property
+    def tuple(self) -> tuple:
+        return self.ax, self.ay
