@@ -6,6 +6,7 @@ import tracks
 import policy
 import racetrack
 import off_policy_mc_control
+import trajectory
 
 
 class Controller:
@@ -14,7 +15,8 @@ class Controller:
 
         self.rng: np.random.Generator = np.random.default_rng()
         self.racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, self.rng)
-        self.states_shape = self.racetrack_.track.shape + (constants.MAX_VELOCITY+1, constants.MAX_VELOCITY+1)
+        self.states_shape = (self.racetrack_.track.shape[1], self.racetrack_.track.shape[0],
+                             constants.MAX_VELOCITY+1, constants.MAX_VELOCITY+1)
 
         # print(self.states_shape)
 
@@ -43,4 +45,17 @@ class Controller:
         # self.policy = np.zeros(shape=self.states.shape, dtype=float)
 
     def run(self):
-        self.algorithm_.run()
+        self.algorithm_.run(100_000)
+        for _ in range(10):
+            self.output_example_trajectory()
+
+    def output_example_trajectory(self):
+        trajectory_ = trajectory.Trajectory(self.racetrack_, verbose=True)
+        t = 0
+        while not trajectory_.is_terminated:
+            action_ = self.target_policy.get_action(trajectory_.current.state)
+            print(f"t={t} \t state = {trajectory_.current.state} \t action = {action_}")
+            trajectory_.apply_action(action_)
+            t += 1
+        # trajectory_.output()
+        print(f"final position = {trajectory_.current.state.x}, {trajectory_.current.state.y}")

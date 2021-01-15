@@ -40,11 +40,14 @@ class OffPolicyMcControl:
                         self.set_target_policy_to_argmax_q(state_)
 
     # noinspection PyPep8Naming
-    def run(self):
+    def run(self, iterations: int):
         i: int = 0
-        while i <= 100:
+        while i <= iterations:
             if self.verbose:
                 print(f"iteration = {i}")
+            else:
+                if i % 10000 == 0:
+                    print(f"iteration = {i}")
             trajectory_ = trajectory.Trajectory(self.racetrack)
             trajectory_.generate(self.behaviour_policy)
             G: float = 0.0
@@ -52,18 +55,23 @@ class OffPolicyMcControl:
             # reversed_non_terminated = reversed(trajectory_.episode[:-1])
             episode = trajectory_.episode
             T: int = len(episode) - 1
+            # print(f"T = {T}")
             for t in reversed(range(T)):
+                # if t < T-1:
+                #     print(f"t = {t}")
                 R_t_plus_1 = episode[t+1].reward
                 S_t = episode[t].state
-                A_t = episode[t+1].action
+                A_t = episode[t].action
                 G = self.gamma * G + R_t_plus_1
                 s_a = S_t.tuple + A_t.tuple
+                # print(f"s_a = {s_a}")
                 self.C[s_a] += W
                 self.Q[s_a] += (W / self.C[s_a]) * (G - self.Q[s_a])
                 target_action = self.set_target_policy_to_argmax_q(S_t)
                 if A_t.tuple != target_action.tuple:
                     break
                 W /= self.behaviour_policy.get_probability(A_t, S_t)
+            i += 1
 
     def set_target_policy_to_argmax_q(self, state_: state.State) -> action.Action:
         """set target_policy to argmax over a of Q breaking ties consistently"""
