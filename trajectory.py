@@ -53,13 +53,13 @@ class Trajectory:
         if square == enums.Square.END:
             # success
             self.current.reward = 0.0
-            self.current.state = state.State(0, 0, 0, 0, is_terminal=True)
+            self.current.state = state.State(x, y, vx, vy, is_terminal=True)
             self.termination()
         elif square == enums.Square.GRASS:
             # failure, move back to start line
             if self.verbose:
                 print(f"Grass at {x}, {y}")
-                self.trace.output()
+                self.output()
 
             self.current.reward = -1.0
             x, y = self.racetrack.get_a_start_position()
@@ -75,9 +75,12 @@ class Trajectory:
 
     def termination(self):
         if self.verbose:
-            self.trace.output()
+            self.output()
         self.list.append(self.current)
         self.is_terminated = True
+
+    def output(self):
+        self.trace.output()
 
     def velocity_rules(self, vx: int, vy: int) -> tuple:
         vx = self.velocity_bounds(vx)

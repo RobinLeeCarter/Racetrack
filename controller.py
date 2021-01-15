@@ -5,6 +5,7 @@ import constants
 import tracks
 import policy
 import racetrack
+import off_policy_mc_control
 
 
 class Controller:
@@ -15,10 +16,23 @@ class Controller:
         self.racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, self.rng)
         self.states_shape = self.racetrack_.track.shape + (constants.MAX_VELOCITY+1, constants.MAX_VELOCITY+1)
 
-        self.behaviour: policy.RandomPolicy = policy.RandomPolicy(self.rng)
-        self.target: policy.TargetPolicy = policy.TargetPolicy(self.states_shape)
+        # print(self.states_shape)
 
-        self.generate_trajectory()
+        acceleration_range = constants.MAX_ACCELERATION - constants.MIN_ACCELERATION + 1    # 3
+        self.actions_shape = (acceleration_range, acceleration_range)   # (3, 3)
+
+        # print(self.actions_shape)
+
+        self.behaviour_policy: policy.RandomPolicy = policy.RandomPolicy(self.rng, self.actions_shape)
+        self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.states_shape)
+        self.algorithm_: off_policy_mc_control.OffPolicyMcControl = off_policy_mc_control.OffPolicyMcControl(
+                self.states_shape,
+                self.actions_shape,
+                self.behaviour_policy,
+                self.target_policy
+            )
+
+        # self.generate_trajectory()
         # hyperparameters
 
         # self.states = np.arange(101)

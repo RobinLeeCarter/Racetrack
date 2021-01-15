@@ -1,2 +1,5 @@
 MIN_VELOCITY: int = 0
 MAX_VELOCITY: int = 4
+
+MIN_ACCELERATION: int = -1
+MAX_ACCELERATION: int = +1
