@@ -45,14 +45,22 @@ class Controller:
         # self.policy = np.zeros(shape=self.states.shape, dtype=float)
 
     def run(self):
-        self.algorithm_.run(100_000)
+        self.algorithm_.run(1_000_000)
+        self.output_q()
         for _ in range(10):
             self.output_example_trajectory()
+
+    def output_q(self):
+        q = self.algorithm_.Q
+        q_size = q.size
+        q_non_zero = np.count_nonzero(q)
+        percent_non_zero = 100.0 * q_non_zero / q_size
+        print(f"q_size: {q_size}\tq_non_zero: {q_non_zero}\tpercent_non_zero: {percent_non_zero:.2f}")
 
     def output_example_trajectory(self):
         trajectory_ = trajectory.Trajectory(self.racetrack_, verbose=True)
         t = 0
-        while not trajectory_.is_terminated:
+        while not trajectory_.is_terminated and not trajectory_.is_grass:
             action_ = self.target_policy.get_action(trajectory_.current.state)
             print(f"t={t} \t state = {trajectory_.current.state} \t action = {action_}")
             trajectory_.apply_action(action_)

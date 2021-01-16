@@ -24,6 +24,7 @@ class Trajectory:
 
         self.episode: List[reward_state_action.RewardStateAction] = []
         self.is_terminated: bool = False
+        self.is_grass: bool = False
 
         self.current: reward_state_action.RewardStateAction = reward_state_action.RewardStateAction(None, None, None)
         self.begin()
@@ -63,11 +64,11 @@ class Trajectory:
             self.current.state = state.State(x, y, vx, vy, is_terminal=True)
             self.termination()
         elif square == enums.Square.GRASS:
+            self.is_grass = True
             # failure, move back to start line
             if self.verbose:
                 print(f"Grass at {x}, {y}")
                 self.output()
-
             self.current.reward = -1.0
             x, y = self.racetrack.get_a_start_position()
             vx, vy = 0, 0
@@ -101,7 +102,7 @@ class Trajectory:
             if prev_vx == 0:
                 if prev_vy == 0:
                     vx = 0
-                    vy = 1
+                    vy = -1
                 else:
                     vx = 0
                     vy = prev_vy
