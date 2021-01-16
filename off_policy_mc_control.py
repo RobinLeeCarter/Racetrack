@@ -28,6 +28,7 @@ class OffPolicyMcControl:
         self.verbose = verbose
 
         self.center_action_flat_index: int = self.find_center_action_flat_index()
+        # print(f"center_action_flat_index: {self.center_action_flat_index}")   # 4
         self.Q: np.ndarray = np.zeros(shape=states_shape + actions_shape, dtype=float)
         self.Q.fill(-100)  # so that a successful trajectory is always better
         self.C: np.ndarray = np.zeros(shape=self.Q.shape, dtype=float)
@@ -42,7 +43,7 @@ class OffPolicyMcControl:
                     for vx in range(self.states_shape[3]):
                         state_ = state.State(x, y, vx, vy)
                         self.set_target_policy_to_argmax_q(state_)
-                        print(f"s={state_} -> a={self.target_policy.get_action(state_)}")
+                        # print(f"s={state_} -> a={self.target_policy.get_action(state_)}")
 
     def find_center_action_flat_index(self) -> Optional[int]:
         for yi in range(self.actions_shape[0]):
@@ -81,7 +82,7 @@ class OffPolicyMcControl:
                 self.C[s_a] += W
                 self.Q[s_a] += (W / self.C[s_a]) * (G - self.Q[s_a])
                 target_action = self.set_target_policy_to_argmax_q(S_t)
-                print(f"S_t={S_t} -> new_a={target_action}")
+                # print(f"S_t={S_t} -> new_a={target_action}")
                 if A_t.index != target_action.index:
                     break
                 W /= self.behaviour_policy.get_probability(A_t, S_t)
