@@ -19,11 +19,11 @@ class EGreedyPolicy(policy.Policy):
         self.greedy_p = (1 - self.epsilon) + self.non_greedy_p
 
         for index, _ in np.ndenumerate(self.actions):
-            iy = index[0]
-            ix = index[1]
-            ax = ix - constants.MAX_ACCELERATION
-            ay = constants.MAX_ACCELERATION - iy
-            self.actions[iy, ix] = action.Action(ax, ay)
+            # iy = index[0]
+            # ix = index[1]
+            # ax = ix - constants.MAX_ACCELERATION
+            # ay = constants.MAX_ACCELERATION - iy
+            self.actions[iy, ix] = action.Action.get_action_from_index(index)
         self.actions_flattened = self.actions.flatten()
 
     def get_action(self, state_: state.State) -> action.Action:
