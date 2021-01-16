@@ -1,15 +1,13 @@
 from dataclasses import dataclass
 from typing import Optional
 
-import state
-import action
-
+import rsa
 
 @dataclass
 class RewardStateAction:
     reward: Optional[int]
-    state: Optional[state.State]
-    action: Optional[action.Action]
+    state: Optional[rsa.State]
+    action: Optional[rsa.Action]
 
     @property
     def tuple(self) -> tuple:

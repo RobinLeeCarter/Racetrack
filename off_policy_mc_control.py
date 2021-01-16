@@ -4,8 +4,7 @@ import numpy as np
 
 import racetrack
 import policy
-import state
-import action
+import rsa
 import trajectory
 
 
@@ -41,14 +40,14 @@ class OffPolicyMcControl:
             for x in range(self.states_shape[1]):
                 for vy in range(self.states_shape[2]):
                     for vx in range(self.states_shape[3]):
-                        state_ = state.State(x, y, vx, vy)
+                        state_ = rsa.State(x, y, vx, vy)
                         self.set_target_policy_to_argmax_q(state_)
                         # print(f"s={state_} -> a={self.target_policy.get_action(state_)}")
 
     def find_center_action_flat_index(self) -> Optional[int]:
         for yi in range(self.actions_shape[0]):
             for xi in range(self.actions_shape[1]):
-                action_ = action.Action.get_action_from_index((yi, xi))
+                action_ = rsa.Action.get_action_from_index((yi, xi))
                 if action_.ax == 0 and action_.ay == 0:
                     return yi * self.actions_shape[1] + xi
         raise Exception("center_action_flat_index not found")
@@ -88,7 +87,7 @@ class OffPolicyMcControl:
                 W /= self.behaviour_policy.get_probability(A_t, S_t)
             i += 1
 
-    def set_target_policy_to_argmax_q(self, state_: state.State) -> action.Action:
+    def set_target_policy_to_argmax_q(self, state_: rsa.State) -> rsa.Action:
         """set target_policy to argmax over a of Q breaking ties consistently"""
         # state_index = self.get_index_from_state(state_)
         # print(f"state_index {state_index}")
@@ -111,19 +110,8 @@ class OffPolicyMcControl:
         # print(f"consistent_best_flat_index {consistent_best_flat_index}")
         best_index = np.unravel_index(consistent_best_flat_index, shape=q_slice.shape)
         # print(f"best_index {best_index}")
-        best_action = action.Action.get_action_from_index(best_index)
+        best_action = rsa.Action.get_action_from_index(best_index)
         # best_action = self.get_action_from_index(best_index)
         # print(f"best_action {best_action}")
         self.target_policy.set_action(state_, best_action)
         return best_action
-
-    # def get_index_from_state(self, state_: state.State) -> index:
-    #     return state_.x, state_.y, state_.vx, state_.vy
-
-    # def get_action_from_index(self, index: tuple) -> action.Action:
-    #     # print(index)
-    #     iy = index[0]
-    #     ix = index[1]
-    #     ax = ix - 1
-    #     ay = iy - 1
-    #     return action.Action(ax, ay)

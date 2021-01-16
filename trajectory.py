@@ -1,15 +1,11 @@
-from typing import Optional, List
-
-import numpy as np
+from typing import List
 
 import enums
 import constants
 
 import racetrack
-import action
-import state
+import rsa
 import trace
-import reward_state_action
 import policy
 
 
@@ -22,17 +18,17 @@ class Trajectory:
         self.max_x: int = self.racetrack.track.shape[1]
         self.trace: trace.Trace = trace.Trace(self.racetrack)
 
-        self.episode: List[reward_state_action.RewardStateAction] = []
+        self.episode: List[rsa.RewardStateAction] = []
         self.is_terminated: bool = False
         self.is_grass: bool = False
 
-        self.current: reward_state_action.RewardStateAction = reward_state_action.RewardStateAction(None, None, None)
+        self.current: rsa.RewardStateAction = rsa.RewardStateAction(None, None, None)
         self.begin()
 
     def begin(self):
         # get start position and set state
         x, y = self.racetrack.get_a_start_position()
-        self.current.state = state.State(x, y)
+        self.current.state = rsa.State(x, y)
         if self.verbose:
             self.trace.mark(self.current.state)
 
@@ -41,7 +37,7 @@ class Trajectory:
             action_ = policy_.get_action(self.current.state)
             self.apply_action(action_)
 
-    def apply_action(self, action_: action.Action):
+    def apply_action(self, action_: rsa.Action):
         # record in list
         self.current.action = action_
         self.episode.append(self.current)
@@ -57,11 +53,11 @@ class Trajectory:
         square = self.racetrack.get_square(x, y)
 
         # begin new (reward, state, action)
-        self.current = reward_state_action.RewardStateAction(None, None, None)
+        self.current = rsa.RewardStateAction(None, None, None)
         if square == enums.Square.END:
             # success
             self.current.reward = 0.0
-            self.current.state = state.State(x, y, vx, vy, is_terminal=True)
+            self.current.state = rsa.State(x, y, vx, vy, is_terminal=True)
             self.termination()
         elif square == enums.Square.GRASS:
             self.is_grass = True
@@ -72,14 +68,14 @@ class Trajectory:
             self.current.reward = -1.0
             x, y = self.racetrack.get_a_start_position()
             vx, vy = 0, 0
-            self.current.state = state.State(x, y, vx, vy)
+            self.current.state = rsa.State(x, y, vx, vy)
             self.trace.start()
             if self.verbose:
                 self.trace.mark(self.current.state)
         else:
             # TRACK or START so continue
             self.current.reward = -1.0
-            self.current.state = state.State(x, y, vx, vy)
+            self.current.state = rsa.State(x, y, vx, vy)
             if self.verbose:
                 self.trace.mark(self.current.state)
 

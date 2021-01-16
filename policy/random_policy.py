@@ -1,7 +1,6 @@
 import numpy as np
 
-import action
-import state
+from rsa import action, state
 import policy
 import constants
 

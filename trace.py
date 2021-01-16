@@ -4,7 +4,7 @@ import numpy as np
 
 import enums
 import racetrack
-import state
+import rsa
 
 
 class Trace:
@@ -16,7 +16,7 @@ class Trace:
     def start(self):
         self.trace = self.racetrack.track.copy()
 
-    def mark(self, state_: state.State):
+    def mark(self, state_: rsa.State):
         ix, iy = self.racetrack.get_index(state_.x, state_.y)
         self.trace[iy, ix] = enums.Square.CAR
 
