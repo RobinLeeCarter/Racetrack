@@ -102,7 +102,7 @@ class Trajectory:
             if prev_vx == 0:
                 if prev_vy == 0:
                     vx = 0
-                    vy = -1
+                    vy = 1
                 else:
                     vx = 0
                     vy = prev_vy

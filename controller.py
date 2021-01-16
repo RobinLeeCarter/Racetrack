@@ -15,7 +15,7 @@ class Controller:
 
         self.rng: np.random.Generator = np.random.default_rng()
         self.racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, self.rng)
-        self.states_shape = (self.racetrack_.track.shape[1], self.racetrack_.track.shape[0],
+        self.states_shape = (self.racetrack_.track.shape[0], self.racetrack_.track.shape[1],
                              constants.MAX_VELOCITY+1, constants.MAX_VELOCITY+1)
 
         # print(self.states_shape)
@@ -25,8 +25,9 @@ class Controller:
 
         # print(self.actions_shape)
 
-        self.behaviour_policy: policy.RandomPolicy = policy.RandomPolicy(self.rng, self.actions_shape)
         self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.states_shape)
+        self.behaviour_policy: policy.RandomPolicy = policy.RandomPolicy(self.rng, self.actions_shape)
+
         self.algorithm_: off_policy_mc_control.OffPolicyMcControl = off_policy_mc_control.OffPolicyMcControl(
                 self.racetrack_,
                 self.states_shape,
@@ -45,7 +46,7 @@ class Controller:
         # self.policy = np.zeros(shape=self.states.shape, dtype=float)
 
     def run(self):
-        self.algorithm_.run(1_000_000)
+        self.algorithm_.run(100_000)
         self.output_q()
         for _ in range(10):
             self.output_example_trajectory()

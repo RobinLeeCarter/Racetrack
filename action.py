@@ -10,5 +10,5 @@ class Action:
     ay: int = 0     # -1 <= ay <= +1
 
     @property
-    def tuple(self) -> tuple:
-        return self.ax, self.ay
+    def index(self) -> tuple:
+        return self.ay, self.ax

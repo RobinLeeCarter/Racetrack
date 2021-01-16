@@ -18,5 +18,5 @@ class State:
     is_terminal: bool = False
 
     @property
-    def tuple(self) -> tuple:
-        return self.x, self.y, self.vx, self.vy
+    def index(self) -> tuple:
+        return self.y, self.x, self.vy, self.vx
