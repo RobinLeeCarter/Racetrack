@@ -1,6 +1,6 @@
 import abc
 
-from rsa import action, state
+from environment import action, state
 
 
 class Policy(abc.ABC):

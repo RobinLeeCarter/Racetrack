@@ -1,6 +1,6 @@
 import numpy as np
 
-from rsa import action, state
+from environment import action, state
 import policy
 
 

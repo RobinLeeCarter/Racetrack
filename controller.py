@@ -6,7 +6,7 @@ import tracks
 import policy
 import racetrack
 import off_policy_mc_control
-import trajectory
+from episode import trajectory
 
 
 class Controller:
