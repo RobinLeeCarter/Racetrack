@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 
 import numpy as np
 
@@ -21,8 +21,9 @@ class OffPolicyMcControl:
         self.gamma = gamma
         self.verbose = verbose
 
-        # self.center_action_flat_index: int = self.find_center_action_flat_index()
+        self.center_action_flat_index: int = self.find_center_action_flat_index()
         # print(f"center_action_flat_index: {self.center_action_flat_index}")   # 4
+
         q_shape = self.environment.states_shape + self.environment.actions_shape
         self.Q: np.ndarray = np.zeros(shape=q_shape, dtype=float)
         self.Q.fill(-100)  # so that a successful trajectory is always better
@@ -33,13 +34,9 @@ class OffPolicyMcControl:
         for state_ in self.environment.states():
             self.set_target_policy_to_argmax_q(state_)
 
-    def find_center_action_flat_index(self) -> Optional[int]:
-        for yi in range(self.actions_shape[0]):
-            for xi in range(self.actions_shape[1]):
-                action_ = environment.Action.get_action_from_index((yi, xi))
-                if action_.ax == 0 and action_.ay == 0:
-                    return yi * self.actions_shape[1] + xi
-        raise Exception("center_action_flat_index not found")
+    def find_center_action_flat_index(self) -> int:
+        action_ = environment.Action(ax=0, ay=0)
+        return int(np.ravel_multi_index(action_.index, self.environment.actions_shape))
 
     # noinspection PyPep8Naming
     def run(self, iterations: int):
@@ -75,7 +72,6 @@ class OffPolicyMcControl:
                 W /= self.agent.policy.get_probability(S_t, A_t)
             i += 1
 
-    # TODO: from here
     def set_target_policy_to_argmax_q(self, state_: environment.State) -> environment.Action:
         """set target_policy to argmax over a of Q breaking ties consistently"""
         # state_index = self.get_index_from_state(state_)

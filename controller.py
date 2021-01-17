@@ -1,7 +1,5 @@
 import numpy as np
 
-import constants
-
 import tracks
 import racetrack
 import environment

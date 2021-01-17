@@ -1,4 +1,4 @@
-from typing import Generator, Optional
+from typing import Generator
 
 import constants
 import enums
