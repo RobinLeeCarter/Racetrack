@@ -1,3 +1,5 @@
+from typing import Generator
+
 import numpy as np
 
 import racetrack
@@ -29,24 +31,36 @@ class Environment:
         self.max_ay: int = constants.MAX_ACCELERATION
 
         self.state_shape: tuple = (self.max_y + 1, self.max_x + 1, self.max_vy + 1, self.max_vx + 1)
-        self.states: np.ndarray = np.empty(shape=self.state_shape, dtype=state.State)
-        self.build_states()
+        # self.states: np.ndarray = np.empty(shape=self.state_shape, dtype=state.State)
+        # self.build_states()
 
         self.action_shape: tuple = (self.max_ay - self.min_ay + 1, self.max_ax - self.min_ax + 1)
-        self.actions: np.ndarray = np.empty(shape=self.action_shape, dtype=action.Action)
-        self.build_actions()
+        # self.actions: np.ndarray = np.empty(shape=self.action_shape, dtype=action.Action)
+        # self.build_actions()
 
-    def build_states(self):
+    def states(self) -> Generator[state.State, None, None]:
         for y in range(self.state_shape[0]):
             for x in range(self.state_shape[1]):
                 for vy in range(self.state_shape[2]):
                     for vx in range(self.state_shape[3]):
-                        self.states[y, x, vy, vx] = state.State(x, y, vx, vy)
+                        yield state.State(x, y, vx, vy)
 
-    def build_actions(self):
+    def actions(self) -> Generator[action.Action, None, None]:
         for iy in range(self.action_shape[0]):
             for ix in range(self.action_shape[1]):
-                self.actions[iy, ix] = action.Action.get_action_from_index((iy, ix))
+                yield action.Action.get_action_from_index((iy, ix))
+
+    # def build_states(self):
+    #     for y in range(self.state_shape[0]):
+    #         for x in range(self.state_shape[1]):
+    #             for vy in range(self.state_shape[2]):
+    #                 for vx in range(self.state_shape[3]):
+    #                     self.states[y, x, vy, vx] = state.State(x, y, vx, vy)
+    #
+    # def build_actions(self):
+    #     for iy in range(self.action_shape[0]):
+    #         for ix in range(self.action_shape[1]):
+    #             self.actions[iy, ix] = action.Action.get_action_from_index((iy, ix))
 
     def get_a_start_state(self) -> state.State:
         x, y = self.racetrack.get_a_start_position()
