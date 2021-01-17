@@ -28,10 +28,11 @@ class Controller:
             )
 
     def run(self):
-        self.algorithm_.run(100_000)
+        self.algorithm_.run(100_00)
         self.output_q()
 
         self.agent.set_policy(self.target_policy)
+        # self.target_policy.checking_on = True
         self.environment.verbose = True
         for _ in range(10):
             print()

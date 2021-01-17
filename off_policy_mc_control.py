@@ -26,13 +26,23 @@ class OffPolicyMcControl:
 
         q_shape = self.environment.states_shape + self.environment.actions_shape
         self.Q: np.ndarray = np.zeros(shape=q_shape, dtype=float)
-        self.Q.fill(-100)  # so that a successful trajectory is always better
+        self.initialise_q()
         self.C: np.ndarray = np.zeros(shape=q_shape, dtype=float)
         self.initialise_target_policy()
 
+    def initialise_q(self):
+        # incompatible actions must never be selected
+        self.Q.fill(np.NINF)
+        # so that a successful trajectory is always better
+        for state_ in self.environment.states():
+            for action_ in self.environment.actions_for_state(state_):
+                q_index = state_.index + action_.index
+                self.Q[q_index] = -100
+
     def initialise_target_policy(self):
         for state_ in self.environment.states():
-            self.set_target_policy_to_argmax_q(state_)
+            target_action = self.consistent_argmax_q(state_)
+            self.target_policy.set_action(state_, target_action)
 
     def find_center_action_flat_index(self) -> int:
         action_ = environment.Action(ax=0, ay=0)
@@ -65,14 +75,15 @@ class OffPolicyMcControl:
                 # print(f"s_a = {s_a}")
                 self.C[s_a] += W
                 self.Q[s_a] += (W / self.C[s_a]) * (G - self.Q[s_a])
-                target_action = self.set_target_policy_to_argmax_q(S_t)
+                target_action = self.consistent_argmax_q(S_t)
+                self.target_policy.set_action(S_t, target_action)
                 # print(f"S_t={S_t} -> new_a={target_action}")
                 if A_t.index != target_action.index:
                     break
                 W /= self.agent.policy.get_probability(S_t, A_t)
             i += 1
 
-    def set_target_policy_to_argmax_q(self, state_: environment.State) -> environment.Action:
+    def consistent_argmax_q(self, state_: environment.State) -> environment.Action:
         """set target_policy to argmax over a of Q breaking ties consistently"""
         # state_index = self.get_index_from_state(state_)
         # print(f"state_index {state_index}")
@@ -98,5 +109,4 @@ class OffPolicyMcControl:
         best_action = environment.Action.get_action_from_index(best_index)
         # best_action = self.get_action_from_index(best_index)
         # print(f"best_action {best_action}")
-        self.target_policy.set_action(state_, best_action)
         return best_action
