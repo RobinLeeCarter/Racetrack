@@ -1,5 +1,6 @@
 import environment
 import policy
+import episode
 
 
 class Agent:
@@ -10,4 +11,6 @@ class Agent:
     def set_policy(self, policy_: policy.Policy):
         self.policy = policy_
 
-
+    def generate_episode(self):
+        episode_ = episode.Episode(self.environment, self.policy)
+        episode_.generate()

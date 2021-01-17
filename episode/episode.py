@@ -7,38 +7,47 @@ import racetrack
 import environment
 import trace
 import policy
+from episode import reward_state_action
 
 
-class Trajectory:
-    def __init__(self, environment_: environment.Environment, verbose: bool = False):
+class Episode:
+    def __init__(self, environment_: environment.Environment, policy_: policy.Policy, verbose: bool = False):
         self.environment: environment.Environment = environment_
+        self.policy: policy.Policy = policy_
         self.verbose: bool = verbose
 
-        self.max_y: int = self.racetrack.track.shape[0]
-        self.max_x: int = self.racetrack.track.shape[1]
-        self.trace: trace.Trace = trace.Trace(self.racetrack)
+        self.trace: trace.Trace = trace.Trace(self.environment.racetrack)
 
-        self.episode: List[environment.RewardStateAction] = []
+        self.trajectory: List[reward_state_action.RewardStateAction] = []
         self.is_terminated: bool = False
         self.is_grass: bool = False
 
-        self.current: environment.RewardStateAction = environment.RewardStateAction(None, None, None)
-        self.begin()
+        self.current: reward_state_action.RewardStateAction = reward_state_action.RewardStateAction(None, None, None)
 
-    def begin(self):
-        self.current.state = self.environment.get_a_start_state()
+    def generate(self):
+        self.environment.start()
         if self.verbose:
-            self.trace.mark(self.current.state)
+            self.trace.mark(self.environment.state)
 
-    def generate(self, policy_: policy.Policy):
         while not self.is_terminated:
-            action_ = policy_.get_action(self.current.state)
-            self.apply_action(action_)
+            # get action
+            current_actions = self.environment.current_actions()
+            action_ = self.policy.get_action_given_state(self.environment.state, current_actions)
+
+            # record in list
+            self.current.action = action_
+            self.trajectory.append(self.current)
+
+            # apply action
+            self.environment.apply_action(action_)
+
+            if self.verbose:
+                pass
 
     def apply_action(self, action_: environment.Action):
         # record in list
         self.current.action = action_
-        self.episode.append(self.current)
+        self.trajectory.append(self.current)
 
         # apply acceleration to velocity
         vx = self.current.state.vx + action_.ax
@@ -80,38 +89,8 @@ class Trajectory:
     def termination(self):
         if self.verbose:
             self.output()
-        self.episode.append(self.current)
+        self.trajectory.append(self.current)
         self.is_terminated = True
 
     def output(self):
         self.trace.output()
-
-    def velocity_rules(self, vx: int, vy: int) -> tuple:
-        vx = self.velocity_bounds(vx)
-        vy = self.velocity_bounds(vy)
-
-        if vx == 0 and vy == 0:
-            prev_vx = self.current.state.vx
-            prev_vy = self.current.state.vy
-            if prev_vx == 0:
-                if prev_vy == 0:
-                    vx = 0
-                    vy = 1
-                else:
-                    vx = 0
-                    vy = prev_vy
-            else:
-                vx = prev_vx
-                vy = 0
-
-        assert not (vx == 0 and vy == 0)
-
-        return vx, vy
-
-    def velocity_bounds(self, v: int) -> int:
-        if v > constants.MAX_VELOCITY:
-            return constants.MAX_VELOCITY
-        elif v < constants.MIN_VELOCITY:
-            return constants.MIN_VELOCITY
-        else:
-            return v

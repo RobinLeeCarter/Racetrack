@@ -30,8 +30,8 @@ class Environment:
         self.min_ay: int = constants.MIN_ACCELERATION
         self.max_ay: int = constants.MAX_ACCELERATION
 
-        self.state_shape: tuple = (self.max_x + 1, self.max_y + 1, self.max_vx + 1, self.max_vy + 1)
-        self.action_shape: tuple = (self.max_ax - self.min_ax + 1, self.max_ay - self.min_ay + 1)
+        self.states_shape: tuple = (self.max_x + 1, self.max_y + 1, self.max_vx + 1, self.max_vy + 1)
+        self.actions_shape: tuple = (self.max_ax - self.min_ax + 1, self.max_ay - self.min_ay + 1)
 
         # current state
         self.state: Optional[state.State] = None
@@ -40,24 +40,30 @@ class Environment:
         # pre-reset state (if not None it means the state has just been reset and this was the failure state)
         self.pre_reset_state: Optional[state.State] = None
 
-    def set_start_state(self):
+    def start(self):
         x, y = self.racetrack.get_a_start_position()
         self.state = state.State(x, y)
+        self.reward = 0.0
+        self.pre_reset_state = None
 
     def states(self) -> Generator[state.State, None, None]:
         """set S"""
-        for x in range(self.state_shape[0]):
-            for y in range(self.state_shape[1]):
-                for vx in range(self.state_shape[2]):
-                    for vy in range(self.state_shape[3]):
+        for x in range(self.states_shape[0]):
+            for y in range(self.states_shape[1]):
+                for vx in range(self.states_shape[2]):
+                    for vy in range(self.states_shape[3]):
                         yield state.State(x, y, vx, vy)
 
     def actions(self) -> Generator[action.Action, None, None]:
         """set A"""
-        for iy in range(self.action_shape[0]):
-            for ix in range(self.action_shape[1]):
+        for iy in range(self.actions_shape[0]):
+            for ix in range(self.actions_shape[1]):
                 yield action.Action.get_action_from_index((iy, ix))
 
+    def current_actions(self) -> Generator[action.Action, None, None]:
+        yield from self.actions_for_state(self.state)
+
+    # possible need to materialise this if it's slow since it will be at the bottom of the loop
     def actions_for_state(self, state_: state.State) -> Generator[action.Action, None, None]:
         """set A(s)"""
         for action_ in self.actions():

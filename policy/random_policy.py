@@ -1,29 +1,33 @@
+from typing import Optional, List
+
 import numpy as np
 
-from environment import action, state
+import environment
 import policy
-import constants
 
 
 class RandomPolicy(policy.Policy):
     # fully random
-    def __init__(self, rng: np.random.Generator, actions_shape: tuple):
+    def __init__(self, environment_: environment.Environment, rng: np.random.Generator):
+        super().__init__(environment_)
         self.rng: np.random.Generator = rng
-        self.actions: np.ndarray = np.empty(shape=actions_shape, dtype=action.Action)
-        # self.p: np.ndarray = np.zeros(shape=self.action_shape, dtype=float)
-        # self.p[:, :] = 1.0/9.0
-        self.p = 1.0/self.actions.size
 
-        for index, _ in np.ndenumerate(self.actions):
-            iy = index[0]
-            ix = index[1]
-            ax = ix - constants.MAX_ACCELERATION
-            ay = constants.MAX_ACCELERATION - iy
-            self.actions[iy, ix] = action.Action(ax, ay)
-        self.actions_flattened = self.actions.flatten()
+        # cache state and possible actions for get_probability to avoid doing it twice
+        self.state: Optional[environment.State] = None
+        self.possible_actions: List[environment.Action] = []
 
-    def get_action(self, state_: state.State) -> action.Action:
-        return self.rng.choice(self.actions_flattened)
+    def get_action_given_state(self, state_: environment.State) -> environment.Action:
+        self.set_possible_actions(state_)
+        return self.rng.choice(self.possible_actions)
 
-    def get_probability(self, action_: action.Action, state_: state.State) -> float:
-        return self.p
+    def get_probability(self, state_: environment.State, action_: environment.Action) -> float:
+        self.set_possible_actions(state_)
+        return 1.0 / len(self.possible_actions)
+
+    def set_possible_actions(self, state_: environment.State):
+        if self.state is None or state_ != self.state:
+            # can't use cached version
+            self.state = state_
+            self.possible_actions = [action for action in self.environment.actions_for_state(state_)]
+            if not self.possible_actions:
+                raise Exception(f"EGreedyPolicy state: {state_} no possible actions")

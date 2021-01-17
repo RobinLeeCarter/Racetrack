@@ -1,21 +1,26 @@
 import numpy as np
 
-from environment import action, state
+import environment
 import policy
 
 
 class DeterministicPolicy(policy.Policy):
-    def __init__(self, states_shape: tuple):
-        self._action_given_state: np.ndarray = np.empty(shape=states_shape, dtype=action.Action)
+    def __init__(self, environment_: environment.Environment):
+        super().__init__(environment_)
+        self._action_given_state: np.ndarray = np.empty(shape=self.environment.states_shape, dtype=environment.Action)
 
-    def set_action(self, state_: state.State, action_: action.Action):
-        self._action_given_state[state_.y, state_.x, state_.vy, state_.vx] = action_
+    def set_action(self, state_: environment.State, action_: environment.Action):
+        self._action_given_state[state_.index] = action_
 
-    def get_action(self, state_: state.State) -> action.Action:
-        return self._action_given_state[state_.y, state_.x, state_.vy, state_.vx]
+    def get_action_given_state(self, state_: environment.State) -> environment.Action:
+        action_ = self._action_given_state[state_.index]
+        if self.environment.is_action_compatible_with_state(state_, action_):
+            return action_
+        else:
+            raise Exception(f"DeterministicPolicy state: {state_} not compatible with action: {action_}")
 
-    def get_probability(self, action_: action.Action, state_: state.State) -> float:
-        deterministic_action = self.get_action(state_)
+    def get_probability(self, state_: environment.State, action_: environment.Action) -> float:
+        deterministic_action = self.get_action_given_state(state_)
         if action_ == deterministic_action:
             return 1.0
         else:

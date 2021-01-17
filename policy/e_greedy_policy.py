@@ -1,34 +1,31 @@
+from typing import Optional, List
+
 import numpy as np
 
-from environment import action, state
+import environment
 import policy
 
 
-class EGreedyPolicy(policy.Policy):
-    # e-greedy
-    def __init__(self, rng: np.random.Generator, actions_shape: tuple,
+class EGreedyPolicy(policy.RandomPolicy):
+    def __init__(self, environment_: environment.Environment, rng: np.random.Generator,
                  greedy_policy: policy.Policy, epsilon: float = 0.1):
-        self.rng: np.random.Generator = rng
+        super().__init__(environment_, rng)
         self.greedy_policy: policy.Policy = greedy_policy
         self.epsilon = epsilon
 
-        self.actions: np.ndarray = np.empty(shape=actions_shape, dtype=action.Action)
-        self.non_greedy_p = self.epsilon * (1.0 / self.actions.size)
-        self.greedy_p = (1 - self.epsilon) + self.non_greedy_p
-
-        for index, _ in np.ndenumerate(self.actions):
-            self.actions[index] = action.Action.get_action_from_index(index)
-        self.actions_flattened = self.actions.flatten()
-
-    def get_action(self, state_: state.State) -> action.Action:
+    def get_action_given_state(self, state_: environment.State) -> environment.Action:
         if self.rng.uniform() > self.epsilon:
-            return self.greedy_policy.get_action(state_)
+            return self.greedy_policy.get_action_given_state(state_)
         else:
-            return self.rng.choice(self.actions_flattened)
+            self.set_possible_actions(state_)
+            return self.rng.choice(self.possible_actions)
 
-    def get_probability(self, action_: action.Action, state_: state.State) -> float:
-        greedy_action = self.greedy_policy.get_action(state_)
+    def get_probability(self, state_: environment.State, action_: environment.Action) -> float:
+        self.set_possible_actions(state_)
+        non_greedy_p = self.epsilon * (1.0 / len(self.possible_actions))
+        greedy_action = self.greedy_policy.get_action_given_state(state_)
         if action_ == greedy_action:
-            return self.greedy_p
+            greedy_p = (1 - self.epsilon) + non_greedy_p
+            return greedy_p
         else:
-            return self.non_greedy_p
+            return non_greedy_p

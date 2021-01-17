@@ -5,7 +5,7 @@ import numpy as np
 import racetrack
 import policy
 import environment
-from episode import trajectory
+from episode import episode
 
 
 class OffPolicyMcControl:
@@ -44,7 +44,7 @@ class OffPolicyMcControl:
                     for vx in range(self.states_shape[3]):
                         state_ = environment.State(x, y, vx, vy)
                         self.set_target_policy_to_argmax_q(state_)
-                        # print(f"s={state_} -> a={self.target_policy.get_action(state_)}")
+                        # print(f"s={state_} -> a={self.target_policy.get_action_given_state(state_)}")
 
     def find_center_action_flat_index(self) -> Optional[int]:
         for yi in range(self.actions_shape[0]):
@@ -63,7 +63,7 @@ class OffPolicyMcControl:
             else:
                 if i % 10000 == 0:
                     print(f"iteration = {i}")
-            trajectory_ = trajectory.Trajectory(self.racetrack)
+            trajectory_ = episode.Trajectory(self.racetrack)
             trajectory_.generate(self.behaviour_policy)
             G: float = 0.0
             W: float = 1.0
@@ -86,7 +86,7 @@ class OffPolicyMcControl:
                 # print(f"S_t={S_t} -> new_a={target_action}")
                 if A_t.index != target_action.index:
                     break
-                W /= self.behaviour_policy.get_probability(A_t, S_t)
+                W /= self.behaviour_policy.get_probability(S_t, A_t)
             i += 1
 
     def set_target_policy_to_argmax_q(self, state_: environment.State) -> environment.Action:

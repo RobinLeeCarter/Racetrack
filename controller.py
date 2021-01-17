@@ -6,7 +6,7 @@ import tracks
 import policy
 import racetrack
 import off_policy_mc_control
-from episode import trajectory
+from episode import episode
 
 
 class Controller:
@@ -59,10 +59,10 @@ class Controller:
         print(f"q_size: {q_size}\tq_non_zero: {q_non_zero}\tpercent_non_zero: {percent_non_zero:.2f}")
 
     def output_example_trajectory(self):
-        trajectory_ = trajectory.Trajectory(self.racetrack_, verbose=True)
+        trajectory_ = episode.Episode(self.racetrack_, verbose=True)
         t = 0
         while not trajectory_.is_terminated and not trajectory_.is_grass:
-            action_ = self.target_policy.get_action(trajectory_.current.state)
+            action_ = self.target_policy.get_action_given_state(trajectory_.current.state)
             print(f"t={t} \t state = {trajectory_.current.state} \t action = {action_}")
             trajectory_.apply_action(action_)
             t += 1
