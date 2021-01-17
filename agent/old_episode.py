@@ -7,7 +7,7 @@ import racetrack
 import environment
 import trace
 import policy
-from episode import reward_state_action
+from agent import reward_state_action
 
 
 class Episode:

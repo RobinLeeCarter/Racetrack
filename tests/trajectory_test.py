@@ -2,7 +2,7 @@ import numpy as np
 
 import racetrack
 import tracks
-from episode import episode
+from agent import episode
 import policy
 
 rng: np.random.Generator = np.random.default_rng()

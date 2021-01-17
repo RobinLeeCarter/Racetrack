@@ -3,9 +3,10 @@ from typing import Optional
 
 import environment
 
+
 @dataclass
 class RewardStateAction:
-    reward: Optional[int]
+    reward: Optional[float]
     state: Optional[environment.State]
     action: Optional[environment.Action]
 

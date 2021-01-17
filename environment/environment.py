@@ -5,12 +5,13 @@ import numpy as np
 import constants
 import enums
 import racetrack
-from environment import action, state
+from environment import action, response, state
 
 
 class Environment:
-    def __init__(self, racetrack_: racetrack.RaceTrack):
+    def __init__(self, racetrack_: racetrack.RaceTrack, verbose: bool = False):
         self.racetrack: racetrack.RaceTrack = racetrack_
+        self.verbose: bool = verbose
 
         # position
         self.min_x: int = 0
@@ -33,18 +34,15 @@ class Environment:
         self.states_shape: tuple = (self.max_x + 1, self.max_y + 1, self.max_vx + 1, self.max_vy + 1)
         self.actions_shape: tuple = (self.max_ax - self.min_ax + 1, self.max_ay - self.min_ay + 1)
 
-        # current state
-        self.state: Optional[state.State] = None
-        self.reward: float = 0.0
+        # current response
+        self.response: Optional[response.Response] = None
 
         # pre-reset state (if not None it means the state has just been reset and this was the failure state)
         self.pre_reset_state: Optional[state.State] = None
 
-    def start(self):
+    def start(self) -> response.Response:
         x, y = self.racetrack.get_a_start_position()
-        self.state = state.State(x, y)
-        self.reward = 0.0
-        self.pre_reset_state = None
+        return response.Response(state=state.State(x, y), reward=0.0)
 
     def states(self) -> Generator[state.State, None, None]:
         """set S"""

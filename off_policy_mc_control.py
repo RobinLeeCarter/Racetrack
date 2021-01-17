@@ -5,7 +5,7 @@ import numpy as np
 import racetrack
 import policy
 import environment
-from episode import episode
+from agent import episode
 
 
 class OffPolicyMcControl:

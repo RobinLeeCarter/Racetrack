@@ -6,7 +6,7 @@ import tracks
 import policy
 import racetrack
 import off_policy_mc_control
-from episode import episode
+from agent import episode
 
 
 class Controller:
