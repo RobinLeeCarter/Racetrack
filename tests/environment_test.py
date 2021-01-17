@@ -14,7 +14,16 @@ def environment_test() -> bool:
     for state_ in environment_.states():
         print(state_)
 
+    print()
+
     for action_ in environment_.actions():
+        print(action_)
+
+    print()
+
+    state_ = environment.State(0, 0, vx=0, vy=4)
+    print(state_)
+    for action_ in environment_.actions_for_state(state_):
         print(action_)
 
     return True

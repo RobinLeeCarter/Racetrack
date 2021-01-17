@@ -1,10 +1,10 @@
-from typing import Generator
+from typing import Generator, Optional
 
 import numpy as np
 
-import racetrack
 import constants
-
+import enums
+import racetrack
 from environment import action, state
 
 
@@ -30,39 +30,72 @@ class Environment:
         self.min_ay: int = constants.MIN_ACCELERATION
         self.max_ay: int = constants.MAX_ACCELERATION
 
-        self.state_shape: tuple = (self.max_y + 1, self.max_x + 1, self.max_vy + 1, self.max_vx + 1)
-        # self.states: np.ndarray = np.empty(shape=self.state_shape, dtype=state.State)
-        # self.build_states()
+        self.state_shape: tuple = (self.max_x + 1, self.max_y + 1, self.max_vx + 1, self.max_vy + 1)
+        self.action_shape: tuple = (self.max_ax - self.min_ax + 1, self.max_ay - self.min_ay + 1)
 
-        self.action_shape: tuple = (self.max_ay - self.min_ay + 1, self.max_ax - self.min_ax + 1)
-        # self.actions: np.ndarray = np.empty(shape=self.action_shape, dtype=action.Action)
-        # self.build_actions()
+        # current state
+        self.state: Optional[state.State] = None
+        self.reward: float = 0.0
+
+        # pre-reset state (if not None it means the state has just been reset and this was the failure state)
+        self.pre_reset_state: Optional[state.State] = None
+
+    def set_start_state(self):
+        x, y = self.racetrack.get_a_start_position()
+        self.state = state.State(x, y)
 
     def states(self) -> Generator[state.State, None, None]:
-        for y in range(self.state_shape[0]):
-            for x in range(self.state_shape[1]):
-                for vy in range(self.state_shape[2]):
-                    for vx in range(self.state_shape[3]):
+        """set S"""
+        for x in range(self.state_shape[0]):
+            for y in range(self.state_shape[1]):
+                for vx in range(self.state_shape[2]):
+                    for vy in range(self.state_shape[3]):
                         yield state.State(x, y, vx, vy)
 
     def actions(self) -> Generator[action.Action, None, None]:
+        """set A"""
         for iy in range(self.action_shape[0]):
             for ix in range(self.action_shape[1]):
                 yield action.Action.get_action_from_index((iy, ix))
 
-    # def build_states(self):
-    #     for y in range(self.state_shape[0]):
-    #         for x in range(self.state_shape[1]):
-    #             for vy in range(self.state_shape[2]):
-    #                 for vx in range(self.state_shape[3]):
-    #                     self.states[y, x, vy, vx] = state.State(x, y, vx, vy)
-    #
-    # def build_actions(self):
-    #     for iy in range(self.action_shape[0]):
-    #         for ix in range(self.action_shape[1]):
-    #             self.actions[iy, ix] = action.Action.get_action_from_index((iy, ix))
+    def actions_for_state(self, state_: state.State) -> Generator[action.Action, None, None]:
+        """set A(s)"""
+        for action_ in self.actions():
+            if self.is_action_compatible_with_state(state_, action_):
+                yield action_
 
-    def get_a_start_state(self) -> state.State:
-        x, y = self.racetrack.get_a_start_position()
-        return state.State(x, y)
+    def is_action_compatible_with_state(self, state_: state.State, action_: action.Action):
+        new_vx = state_.vx + action_.ax
+        new_vy = state_.vy + action_.ay
+        if self.min_vx <= new_vx <= self.max_vx and \
+            self.min_vy <= new_vy <= self.max_vy and \
+                not (new_vx == 0 and new_vy == 0):
+            return True
+        else:
+            return False
 
+    def apply_action(self, action_: action.Action):
+        if not self.is_action_compatible_with_state(self.state, action_):
+            raise Exception(f"state {self.state} incompatible with action {action_}")
+
+        vx = self.state.vx + action_.ax
+        vy = self.state.vy + action_.ay
+        x = self.state.x + vx
+        y = self.state.y + vy
+
+        square = self.racetrack.get_square(x, y)
+        if square == enums.Square.END:
+            # success
+            self.pre_reset_state = None
+            self.reward = 0.0
+            self.state = state.State(x, y, vx, vy, is_terminal=True)
+        elif square == enums.Square.GRASS:
+            # failure, move back to start line
+            self.pre_reset_state = state.State(x, y, vx, vy, is_reset=True)
+            self.reward = -1.0
+            self.state = self.get_a_start_state()
+        else:
+            # TRACK or START so continue
+            self.pre_reset_state = None
+            self.reward = -1.0
+            self.state = state.State(x, y, vx, vy)

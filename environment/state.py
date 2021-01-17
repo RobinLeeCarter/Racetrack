@@ -17,6 +17,9 @@ class State:
     # terminal
     is_terminal: bool = False
 
+    # reset and continue
+    is_reset: bool = False
+
     @property
     def index(self) -> tuple:
-        return self.y, self.x, self.vy, self.vx
+        return self.x, self.y, self.vx, self.vy

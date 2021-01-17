@@ -16,13 +16,13 @@ class Action:
     def index(self) -> tuple:
         # ax = ix - constants.MAX_ACCELERATION
         # ay = constants.MAX_ACCELERATION - iy
-        ix = self.ax + constants.MAX_ACCELERATION
-        iy = constants.MAX_ACCELERATION - self.ay
-        return iy, ix
+        ix = self.ax - constants.MIN_ACCELERATION
+        iy = self.ay - constants.MIN_ACCELERATION
+        return ix, iy
 
     @staticmethod
     def get_action_from_index(index: tuple) -> Action:
-        iy, ix = index
-        ax = ix - constants.MAX_ACCELERATION
-        ay = constants.MAX_ACCELERATION - iy
+        ix, iy = index
+        ax = ix + constants.MIN_ACCELERATION
+        ay = iy + constants.MIN_ACCELERATION
         return Action(ax, ay)
