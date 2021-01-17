@@ -16,8 +16,9 @@ class Controller:
         self.racetrack = racetrack.RaceTrack(tracks.TRACK_1, self.rng)
         self.environment = environment.Environment(self.racetrack, verbose=False)
         self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.environment)
-        self.behaviour_policy: policy.EGreedyPolicy = policy.EGreedyPolicy(self.environment, self.rng,
-                                                                           greedy_policy=self.target_policy)
+        # self.behaviour_policy: policy.EGreedyPolicy = policy.EGreedyPolicy(self.environment, self.rng,
+        #                                                                    greedy_policy=self.target_policy)
+        self.behaviour_policy: policy.RandomPolicy = policy.RandomPolicy(self.environment, self.rng)
         self.agent = agent.Agent(self.environment, self.behaviour_policy)
 
         self.algorithm_: off_policy_mc_control.OffPolicyMcControl = off_policy_mc_control.OffPolicyMcControl(
@@ -28,7 +29,7 @@ class Controller:
             )
 
     def run(self):
-        self.algorithm_.run(100_00)
+        self.algorithm_.run(1_000_00)
         self.output_q()
 
         self.agent.set_policy(self.target_policy)
