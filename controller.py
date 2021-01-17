@@ -29,7 +29,7 @@ class Controller:
             )
 
     def run(self):
-        self.algorithm_.run(1_000_00)
+        self.algorithm_.run(1_000)
         self.output_q()
 
         self.agent.set_policy(self.target_policy)
