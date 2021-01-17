@@ -1,11 +1,9 @@
 from typing import List
 
 import enums
-import constants
 
-import racetrack
 import environment
-import trace
+from environment import trace
 import policy
 from agent import reward_state_action
 

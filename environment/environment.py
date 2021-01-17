@@ -1,11 +1,9 @@
 from typing import Generator, Optional
 
-import numpy as np
-
 import constants
 import enums
 import racetrack
-from environment import action, response, state
+from environment import action, response, state, trace
 
 
 class Environment:
@@ -33,17 +31,12 @@ class Environment:
 
         self.states_shape: tuple = (self.max_x + 1, self.max_y + 1, self.max_vx + 1, self.max_vy + 1)
         self.actions_shape: tuple = (self.max_ax - self.min_ax + 1, self.max_ay - self.min_ay + 1)
-
-        # current response
-        self.response: Optional[response.Response] = None
+        self.trace_ = trace.Trace = trace.Trace(self.racetrack)
 
         # pre-reset state (if not None it means the state has just been reset and this was the failure state)
-        self.pre_reset_state: Optional[state.State] = None
+        # self.pre_reset_state: Optional[state.State] = None
 
-    def start(self) -> response.Response:
-        x, y = self.racetrack.get_a_start_position()
-        return response.Response(state=state.State(x, y), reward=0.0)
-
+    # region Sets
     def states(self) -> Generator[state.State, None, None]:
         """set S"""
         for x in range(self.states_shape[0]):
@@ -58,8 +51,8 @@ class Environment:
             for ix in range(self.actions_shape[1]):
                 yield action.Action.get_action_from_index((iy, ix))
 
-    def current_actions(self) -> Generator[action.Action, None, None]:
-        yield from self.actions_for_state(self.state)
+    # def current_actions(self) -> Generator[action.Action, None, None]:
+    #     yield from self.actions_for_state(self.state)
 
     # possible need to materialise this if it's slow since it will be at the bottom of the loop
     def actions_for_state(self, state_: state.State) -> Generator[action.Action, None, None]:
@@ -77,29 +70,52 @@ class Environment:
             return True
         else:
             return False
+    # endregion
 
-    def apply_action(self, action_: action.Action):
-        if not self.is_action_compatible_with_state(self.state, action_):
-            raise Exception(f"state {self.state} incompatible with action {action_}")
+    # region Operation
+    def start(self) -> response.Response:
+        state_ = self.get_a_start_state()
+        if self.verbose:
+            self.trace_.start(state_)
+        return response.Response(state=state_, reward=0.0)
 
-        vx = self.state.vx + action_.ax
-        vy = self.state.vy + action_.ay
-        x = self.state.x + vx
-        y = self.state.y + vy
+    def get_a_start_state(self) -> state.State:
+        x, y = self.racetrack.get_a_start_position()
+        return state.State(x, y)
+
+    def apply_action_to_state(self, state_: state.State, action_: action.Action) -> response.Response:
+        if not self.is_action_compatible_with_state(state_, action_):
+            raise Exception(f"apply_action_to_state state {state_} incompatible with action {action_}")
+
+        vx = state_.vx + action_.ax
+        vy = state_.vy + action_.ay
+        x = state_.x + vx
+        y = state_.y + vy
 
         square = self.racetrack.get_square(x, y)
         if square == enums.Square.END:
             # success
-            self.pre_reset_state = None
-            self.reward = 0.0
-            self.state = state.State(x, y, vx, vy, is_terminal=True)
+            reward = 0.0
+            state_ = state.State(x, y, vx, vy, is_terminal=True)
+            if self.verbose:
+                self.trace_.output()
+                print(f"Past finish line at {x}, {y}")
         elif square == enums.Square.GRASS:
             # failure, move back to start line
-            self.pre_reset_state = state.State(x, y, vx, vy, is_reset=True)
-            self.reward = -1.0
-            self.state = self.get_a_start_state()
+            # self.pre_reset_state = state.State(x, y, vx, vy, is_reset=True)
+            reward = -1.0
+            state_ = self.get_a_start_state()
+            if self.verbose:
+                self.trace_.output()
+                print(f"Grass at {x}, {y}")
+                self.trace_.start(state_)
         else:
             # TRACK or START so continue
-            self.pre_reset_state = None
-            self.reward = -1.0
-            self.state = state.State(x, y, vx, vy)
+            # self.pre_reset_state = None
+            reward = -1.0
+            state_ = state.State(x, y, vx, vy)
+            if self.verbose:
+                self.trace_.mark(state_)
+
+        return response.Response(state_, reward)
+    # endregion

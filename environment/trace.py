@@ -11,10 +11,10 @@ class Trace:
     def __init__(self, racetrack_: racetrack.RaceTrack):
         self.racetrack: racetrack.RaceTrack = racetrack_
         self.trace: Optional[np.ndarray] = None
-        self.start()
 
-    def start(self):
+    def start(self, state_: environment.State):
         self.trace = self.racetrack.track.copy()
+        self.mark(state_)
 
     def mark(self, state_: environment.State):
         ix, iy = self.racetrack.get_index(state_.x, state_.y)
