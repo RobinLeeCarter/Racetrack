@@ -1,50 +1,37 @@
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 
-import racetrack
-import policy
 import environment
-from agent import episode
+import policy
+import agent
 
 
 class OffPolicyMcControl:
     def __init__(self,
-                 racetrack_: racetrack.RaceTrack,
-                 states_shape: tuple,
-                 actions_shape: tuple,
-                 behaviour_policy: policy.Policy,
+                 environment_: environment.Environment,
+                 agent_: agent.Agent,
                  target_policy: policy.DeterministicPolicy,
                  gamma: float = 1.0,
                  verbose: bool = False
                  ):
-        self.racetrack: racetrack.RaceTrack = racetrack_
-        self.states_shape: tuple = states_shape
-        self.actions_shape: tuple = actions_shape
-        self.behaviour_policy: policy.Policy = behaviour_policy
+        self.environment: environment.Environment = environment_
+        self.agent: agent.Agent = agent_
         self.target_policy: policy.DeterministicPolicy = target_policy
         self.gamma = gamma
         self.verbose = verbose
 
-        self.center_action_flat_index: int = self.find_center_action_flat_index()
+        # self.center_action_flat_index: int = self.find_center_action_flat_index()
         # print(f"center_action_flat_index: {self.center_action_flat_index}")   # 4
-        self.Q: np.ndarray = np.zeros(shape=states_shape + actions_shape, dtype=float)
+        q_shape = self.environment.states_shape + self.environment.actions_shape
+        self.Q: np.ndarray = np.zeros(shape=q_shape, dtype=float)
         self.Q.fill(-100)  # so that a successful trajectory is always better
-        self.C: np.ndarray = np.zeros(shape=self.Q.shape, dtype=float)
+        self.C: np.ndarray = np.zeros(shape=q_shape, dtype=float)
         self.initialise_target_policy()
 
     def initialise_target_policy(self):
-        for state_ in self.states:
-
-        for y in range(self.states_shape[0]):
-            if self.verbose:
-                print(f"y = {y}")
-            for x in range(self.states_shape[1]):
-                for vy in range(self.states_shape[2]):
-                    for vx in range(self.states_shape[3]):
-                        state_ = environment.State(x, y, vx, vy)
-                        self.set_target_policy_to_argmax_q(state_)
-                        # print(f"s={state_} -> a={self.target_policy.get_action_given_state(state_)}")
+        for state_ in self.environment.states():
+            self.set_target_policy_to_argmax_q(state_)
 
     def find_center_action_flat_index(self) -> Optional[int]:
         for yi in range(self.actions_shape[0]):
@@ -63,20 +50,19 @@ class OffPolicyMcControl:
             else:
                 if i % 10000 == 0:
                     print(f"iteration = {i}")
-            trajectory_ = episode.Trajectory(self.racetrack)
-            trajectory_.generate(self.behaviour_policy)
+            episode: agent.Episode = self.agent.generate_episode()
+            trajectory: List[agent.RewardStateAction] = episode.trajectory
             G: float = 0.0
             W: float = 1.0
             # reversed_non_terminated = reversed(trajectory_.episode[:-1])
-            episode = trajectory_.episode
-            T: int = len(episode) - 1
+            T: int = len(trajectory) - 1
             # print(f"T = {T}")
             for t in reversed(range(T)):
                 # if t < T-1:
                 #     print(f"t = {t}")
-                R_t_plus_1 = episode[t+1].reward
-                S_t = episode[t].state
-                A_t = episode[t].action
+                R_t_plus_1 = trajectory[t+1].reward
+                S_t = trajectory[t].state
+                A_t = trajectory[t].action
                 G = self.gamma * G + R_t_plus_1
                 s_a = S_t.index + A_t.index
                 # print(f"s_a = {s_a}")
@@ -86,9 +72,10 @@ class OffPolicyMcControl:
                 # print(f"S_t={S_t} -> new_a={target_action}")
                 if A_t.index != target_action.index:
                     break
-                W /= self.behaviour_policy.get_probability(S_t, A_t)
+                W /= self.agent.policy.get_probability(S_t, A_t)
             i += 1
 
+    # TODO: from here
     def set_target_policy_to_argmax_q(self, state_: environment.State) -> environment.Action:
         """set target_policy to argmax over a of Q breaking ties consistently"""
         # state_index = self.get_index_from_state(state_)
