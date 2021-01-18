@@ -1,9 +1,11 @@
 import numpy as np
 
+import enums
 import environment
 import policy
 import agent
 import off_policy_mc_control
+import view
 
 
 class Controller:
@@ -14,9 +16,9 @@ class Controller:
         self.racetrack = environment.track.RaceTrack(environment.track.TRACK_1, self.rng)
         self.environment = environment.Environment(self.racetrack, verbose=False)
         self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.environment)
-        # self.behaviour_policy: policy.EGreedyPolicy = policy.EGreedyPolicy(self.environment, self.rng,
-        #                                                                    greedy_policy=self.target_policy)
-        self.behaviour_policy: policy.RandomPolicy = policy.RandomPolicy(self.environment, self.rng)
+        self.behaviour_policy: policy.EGreedyPolicy = policy.EGreedyPolicy(self.environment, self.rng,
+                                                                           greedy_policy=self.target_policy)
+        # self.behaviour_policy: policy.RandomPolicy = policy.RandomPolicy(self.environment, self.rng)
         self.agent = agent.Agent(self.environment, self.behaviour_policy)
 
         self.algorithm_: off_policy_mc_control.OffPolicyMcControl = off_policy_mc_control.OffPolicyMcControl(
@@ -25,17 +27,22 @@ class Controller:
                 self.target_policy,
                 verbose=self.verbose
             )
+        self.view = view.View(self.racetrack)
 
     def run(self):
-        self.algorithm_.run(1_000)
+        self.algorithm_.run(10_000)
         self.output_q()
 
         self.agent.set_policy(self.target_policy)
-        # self.target_policy.checking_on = True
+        self.view.open_window()
+        # self.view.display_and_wait()
         self.environment.verbose = True
         for _ in range(10):
-            print()
-            self.agent.generate_episode()
+            # print()
+            episode_: agent.Episode = self.agent.generate_episode()
+            user_event: enums.UserEvent = self.view.display_episode(episode_)
+            if user_event == enums.UserEvent.QUIT:
+                break
 
     def output_q(self):
         q = self.algorithm_.Q
@@ -43,15 +50,3 @@ class Controller:
         q_non_zero = np.count_nonzero(q)
         percent_non_zero = 100.0 * q_non_zero / q_size
         print(f"q_size: {q_size}\tq_non_zero: {q_non_zero}\tpercent_non_zero: {percent_non_zero:.2f}")
-
-    # def output_example_trajectory(self):
-    #     episode = self.target_agent
-    #     trajectory_ = episode.Episode(self.racetrack_, verbose=True)
-    #     t = 0
-    #     while not trajectory_.is_terminated and not trajectory_.is_grass:
-    #         action_ = self.target_policy.get_action_given_state(trajectory_.current.state)
-    #         print(f"t={t} \t state = {trajectory_.current.state} \t action = {action_}")
-    #         trajectory_.apply_action(action_)
-    #         t += 1
-    #     # trajectory_.output()
-    #     print(f"final position = {trajectory_.current.state.x}, {trajectory_.current.state.y}")

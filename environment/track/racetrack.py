@@ -36,6 +36,6 @@ class RaceTrack:
         return x, y
 
     def get_index(self, x, y) -> tuple:
-        ix = x
         iy = self.max_y - y
-        return ix, iy
+        ix = x
+        return iy, ix

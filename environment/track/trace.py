@@ -17,7 +17,7 @@ class Trace:
         self.mark(state_)
 
     def mark(self, state_: environment.State):
-        ix, iy = self.racetrack.get_index(state_.x, state_.y)
+        iy, ix = self.racetrack.get_index(state_.x, state_.y)
         self.trace[iy, ix] = enums.Square.CAR
 
     def output(self):
