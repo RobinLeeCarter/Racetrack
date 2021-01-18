@@ -3,7 +3,7 @@ from typing import Optional
 import numpy as np
 
 import enums
-import racetrack
+from environment.track import racetrack
 import environment
 
 

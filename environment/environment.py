@@ -2,13 +2,12 @@ from typing import Generator
 
 import constants
 import enums
-import racetrack
-from environment import action, response, state, trace
+from environment import action, response, state, track
 
 
 class Environment:
-    def __init__(self, racetrack_: racetrack.RaceTrack, verbose: bool = False):
-        self.racetrack: racetrack.RaceTrack = racetrack_
+    def __init__(self, racetrack_: track.RaceTrack, verbose: bool = False):
+        self.racetrack: track.RaceTrack = racetrack_
         self.verbose: bool = verbose
 
         # position
@@ -31,7 +30,7 @@ class Environment:
 
         self.states_shape: tuple = (self.max_x + 1, self.max_y + 1, self.max_vx + 1, self.max_vy + 1)
         self.actions_shape: tuple = (self.max_ax - self.min_ax + 1, self.max_ay - self.min_ay + 1)
-        self.trace_ = trace.Trace = trace.Trace(self.racetrack)
+        self.trace_ = track.Trace = track.Trace(self.racetrack)
 
         # pre-reset state (if not None it means the state has just been reset and this was the failure state)
         # self.pre_reset_state: Optional[state.State] = None

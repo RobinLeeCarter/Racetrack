@@ -1,7 +1,5 @@
 import numpy as np
 
-import tracks
-import racetrack
 import environment
 import policy
 import agent
@@ -13,7 +11,7 @@ class Controller:
         self.verbose: bool = verbose
 
         self.rng: np.random.Generator = np.random.default_rng()
-        self.racetrack = racetrack.RaceTrack(tracks.TRACK_1, self.rng)
+        self.racetrack = environment.track.RaceTrack(environment.track.TRACK_1, self.rng)
         self.environment = environment.Environment(self.racetrack, verbose=False)
         self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.environment)
         # self.behaviour_policy: policy.EGreedyPolicy = policy.EGreedyPolicy(self.environment, self.rng,

@@ -1,4 +1,4 @@
-import visualizer
+from imported_visualizer import visualizer
 import numpy as np
 
 data = np.zeros(shape=(100, 100), dtype=int)

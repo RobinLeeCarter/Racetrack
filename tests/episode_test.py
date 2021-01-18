@@ -1,7 +1,5 @@
 import numpy as np
 
-import racetrack
-import tracks
 import environment
 import agent
 import policy
@@ -10,7 +8,7 @@ rng: np.random.Generator = np.random.default_rng()
 
 
 def episode_test() -> bool:
-    racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, rng)
+    racetrack_ = environment.track.RaceTrack(environment.track.TRACK_1, rng)
     environment_ = environment.Environment(racetrack_, verbose=True)
     policy_ = policy.RandomPolicy(environment_, rng)
     agent_ = agent.Agent(environment_, policy_, verbose=True)

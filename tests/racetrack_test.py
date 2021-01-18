@@ -1,14 +1,13 @@
 import numpy as np
 
 import enums
-import racetrack
-import tracks
+from environment import track
 
 rng: np.random.Generator = np.random.default_rng()
 
 
 def racetrack_test1() -> bool:
-    racetrack_ = racetrack.RaceTrack(tracks.TRACK_1, rng)
+    racetrack_ = track.RaceTrack(track.TRACK_1, rng)
     assert racetrack_.get_square(0, 0) == enums.Square.START
     assert racetrack_.get_square(5, 0) == enums.Square.GRASS
     assert racetrack_.get_square(5, 6) == enums.Square.END
