@@ -68,7 +68,7 @@ class View:
         self.background = pygame.Surface(size=self.screen_size)
         self.track_surface = pygame.Surface(size=self.screen_size)
 
-    def draw_square(self, row: int, col: int, square: enums.Square, surface: pygame.Surface):
+    def draw_square(self, row: int, col: int, square: enums.Square, surface: pygame.Surface) -> pygame.Rect:
         color: pygame.Color = self.color_lookup[square]
         left: int = col * self.cell_pixels
         top: int = row * self.cell_pixels
@@ -78,6 +78,7 @@ class View:
         # doesn't like named parameters
         rect: pygame.Rect = pygame.Rect(left, top, width, height)
         pygame.draw.rect(surface, color, rect)
+        return rect
 
     def open_window(self):
         self.screen = pygame.display.set_mode(size=self.screen_size)
@@ -90,7 +91,7 @@ class View:
 
     def display_and_wait(self):
         while self.user_event != enums.UserEvent.QUIT:
-            self.update_screen()
+            self.put_background_on_screen()
             # keys = pygame.key.get_pressed()
             # if keys[pygame.K_SPACE]:
             #     self.user_event = enums.enums.UserEvent.SPACE
@@ -102,12 +103,12 @@ class View:
         # print(episode_.trajectory)
         # print(f"len(self.episode.trajectory) = {len(episode_.trajectory)}")
         self.copy_track_into_background()
+        self.put_background_on_screen()
         self.episode = episode_
         self.t = 0
         terminal = len(self.episode.trajectory) - 1  # terminal state
         while self.user_event != enums.UserEvent.QUIT and self.t <= terminal:
             # need to pass through for terminal state to display penultimate state
-            self.update_screen()
             # keys = pygame.key.get_pressed()
             # if keys[pygame.K_SPACE]:
             #     self.user_event = enums.enums.UserEvent.SPACE
@@ -116,7 +117,7 @@ class View:
             self.handle_event()
         return self.user_event
 
-    def update_screen(self):
+    def put_background_on_screen(self):
         self.screen.blit(source=self.background, dest=(0, 0))
         pygame.display.flip()
 
@@ -165,7 +166,11 @@ class View:
     def draw_car_at_state(self, state: environment.State):
         row, col = self.racetrack.get_index(state.x, state.y)
         # print(f"t={self.t} x={state.x} y={state.y} row={row} col={col}")
-        self.draw_square(row, col, enums.Square.CAR, self.background)
+        rect: pygame.Rect = self.draw_square(row, col, enums.Square.CAR, self.background)
+        self.screen.blit(source=self.background, dest=rect, area=rect)
+        pygame.display.update(rect)
+        # self.screen.blit(source=self.background, dest=(0, 0))
+        # pygame.display.flip()
 
     def draw_random_car(self):
         rng: np.random.Generator = np.random.default_rng()
