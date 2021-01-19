@@ -7,7 +7,7 @@ MAX_VELOCITY: int = 4
 MIN_ACCELERATION: int = -1
 MAX_ACCELERATION: int = +1
 
-TRACK: np.ndarray = tracks.TRACK_2
+TRACK: np.ndarray = tracks.TRACK_4
 
 INITIAL_Q_VALUE: float = -40.0
 EXTRA_REWARD_FOR_FAILURE: float = -40.0   # 0.0 for problem statement
