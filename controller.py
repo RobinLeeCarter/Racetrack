@@ -1,6 +1,9 @@
+from typing import Optional
+
 import numpy as np
 
 import enums
+import constants
 import environment
 import policy
 import agent
@@ -13,7 +16,7 @@ class Controller:
         self.verbose: bool = verbose
 
         self.rng: np.random.Generator = np.random.default_rng()
-        self.racetrack = environment.track.RaceTrack(environment.track.TRACK_2, self.rng)
+        self.racetrack = environment.track.RaceTrack(constants.TRACK, self.rng)
         self.environment = environment.Environment(self.racetrack, self.rng, verbose=False)
         self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.environment)
         self.behaviour_policy: policy.EGreedyPolicy = policy.EGreedyPolicy(self.environment, self.rng,
@@ -38,8 +41,8 @@ class Controller:
         # self.view.display_and_wait()
         # self.environment.verbose = True
         # self.agent.verbose = True
-        for _ in range(10):
-            # print()
+
+        while True:
             episode_: agent.Episode = self.agent.generate_episode()
             user_event: enums.UserEvent = self.view.display_episode(episode_)
             if user_event == enums.UserEvent.QUIT:

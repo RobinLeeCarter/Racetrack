@@ -2,6 +2,7 @@ from typing import List
 
 import numpy as np
 
+import constants
 import environment
 import policy
 import agent
@@ -37,7 +38,7 @@ class OffPolicyMcControl:
         for state_ in self.environment.states():
             for action_ in self.environment.actions_for_state(state_):
                 q_index = state_.index + action_.index
-                self.Q[q_index] = -100
+                self.Q[q_index] = constants.INITIAL_Q_VALUE
 
     def initialise_target_policy(self):
         for state_ in self.environment.states():
