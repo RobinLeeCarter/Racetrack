@@ -1,10 +1,9 @@
+import os_environ_settings
 import controller
-import os
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
 
 def main():
-    # os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+    os_environ_settings.dummy = None
     controller_ = controller.Controller(verbose=False)
     controller_.run()
 

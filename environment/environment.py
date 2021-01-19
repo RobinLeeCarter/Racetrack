@@ -1,4 +1,5 @@
 from typing import Generator
+import numpy as np
 
 import constants
 import enums
@@ -6,8 +7,9 @@ from environment import action, response, state, track
 
 
 class Environment:
-    def __init__(self, racetrack_: track.RaceTrack, verbose: bool = False):
+    def __init__(self, racetrack_: track.RaceTrack, rng: np.random.Generator, verbose: bool = False):
         self.racetrack: track.RaceTrack = racetrack_
+        self.rng: np.random.Generator = rng
         self.verbose: bool = verbose
 
         # position
@@ -86,8 +88,12 @@ class Environment:
         if not self.is_action_compatible_with_state(state_, action_):
             raise Exception(f"apply_action_to_state state {state_} incompatible with action {action_}")
 
-        vx = state_.vx + action_.ax
-        vy = state_.vy + action_.ay
+        if self.rng.uniform() > constants.SKID_PROBABILITY:
+            vx = state_.vx + action_.ax
+            vy = state_.vy + action_.ay
+        else:  # skid
+            vx = state_.vx
+            vy = state_.vy
         x = state_.x + vx
         y = state_.y + vy
 
