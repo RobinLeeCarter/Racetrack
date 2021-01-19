@@ -1,11 +1,10 @@
 from __future__ import annotations
 from typing import Optional, Dict
 
-import enums
 import numpy as np
 import pygame
 
-from enums import UserEvent
+import enums
 from environment import track
 import environment
 import agent
@@ -25,7 +24,7 @@ class View:
         self.background_color: pygame.Color = pygame.Color('grey10')
         self.color_lookup: Dict[enums.Square, pygame.Color] = {}
 
-        self.user_event: UserEvent = enums.UserEvent.NONE
+        self.user_event: enums.UserEvent = enums.UserEvent.NONE
 
         self.t: int = 0
         self.episode: Optional[agent.Episode] = None
@@ -100,8 +99,8 @@ class View:
             self.handle_event()
 
     def display_episode(self, episode_: agent.Episode) -> enums.UserEvent:
-        print(episode_.trajectory)
-        print(f"len(self.episode.trajectory) = {len(self.episode.trajectory)}")
+        # print(episode_.trajectory)
+        # print(f"len(self.episode.trajectory) = {len(episode_.trajectory)}")
         self.copy_track_into_background()
         self.episode = episode_
         self.t = 0
@@ -165,7 +164,7 @@ class View:
 
     def draw_car_at_state(self, state: environment.State):
         row, col = self.racetrack.get_index(state.x, state.y)
-        print(f"t={self.t} x={state.x} y={state.y} row={row} col={col}")
+        # print(f"t={self.t} x={state.x} y={state.y} row={row} col={col}")
         self.draw_square(row, col, enums.Square.CAR, self.background)
 
     def draw_random_car(self):

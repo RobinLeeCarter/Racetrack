@@ -30,14 +30,14 @@ class Controller:
         self.view = view.View(self.racetrack)
 
     def run(self):
-        self.algorithm_.run(100_000)
+        self.algorithm_.run(10_000)
         self.output_q()
 
         self.agent.set_policy(self.target_policy)
         self.view.open_window()
         # self.view.display_and_wait()
-        self.environment.verbose = True
-        self.agent.verbose = True
+        # self.environment.verbose = True
+        # self.agent.verbose = True
         for _ in range(10):
             # print()
             episode_: agent.Episode = self.agent.generate_episode()
