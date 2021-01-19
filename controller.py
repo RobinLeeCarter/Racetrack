@@ -37,6 +37,7 @@ class Controller:
         self.view.open_window()
         # self.view.display_and_wait()
         self.environment.verbose = True
+        self.agent.verbose = True
         for _ in range(10):
             # print()
             episode_: agent.Episode = self.agent.generate_episode()
