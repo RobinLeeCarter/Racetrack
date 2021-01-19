@@ -13,7 +13,7 @@ class Controller:
         self.verbose: bool = verbose
 
         self.rng: np.random.Generator = np.random.default_rng()
-        self.racetrack = environment.track.RaceTrack(environment.track.TRACK_1, self.rng)
+        self.racetrack = environment.track.RaceTrack(environment.track.TRACK_2, self.rng)
         self.environment = environment.Environment(self.racetrack, verbose=False)
         self.target_policy: policy.DeterministicPolicy = policy.DeterministicPolicy(self.environment)
         self.behaviour_policy: policy.EGreedyPolicy = policy.EGreedyPolicy(self.environment, self.rng,
@@ -30,7 +30,7 @@ class Controller:
         self.view = view.View(self.racetrack)
 
     def run(self):
-        self.algorithm_.run(10_000)
+        self.algorithm_.run(100_000)
         self.output_q()
 
         self.agent.set_policy(self.target_policy)

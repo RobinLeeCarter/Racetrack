@@ -100,10 +100,11 @@ class View:
             self.handle_event()
 
     def display_episode(self, episode_: agent.Episode) -> enums.UserEvent:
+        print(episode_.trajectory)
         self.copy_track_into_background()
         self.episode = episode_
         self.t = 0
-        terminal = len(episode_.trajectory) - 1  # terminal
+        terminal = len(self.episode.trajectory) - 1  # terminal
         while self.user_event != enums.UserEvent.QUIT and self.t < terminal:
             self.update_screen()
             # keys = pygame.key.get_pressed()
@@ -161,6 +162,7 @@ class View:
     def draw_car_from_episode(self):
         state: environment.State = self.episode.trajectory[self.t].state
         row, col = self.racetrack.get_index(state.x, state.y)
+        print(f"t={self.t} x={state.x} y={state.y} row={row} col={col}")
         self.draw_square(row, col, enums.Square.CAR, self.background)
 
     def draw_random_car(self):
