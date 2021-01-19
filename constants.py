@@ -9,10 +9,12 @@ MAX_ACCELERATION: int = +1
 
 TRACK: np.ndarray = tracks.TRACK_2
 
-INITIAL_Q_VALUE: float = -30.0
-EXTRA_REWARD_FOR_FAILURE: float = -30.0   # 0.0 for problem statement
+INITIAL_Q_VALUE: float = -40.0
+EXTRA_REWARD_FOR_FAILURE: float = -40.0   # 0.0 for problem statement
 
-SKID_PROBABILITY: float = 0.1   # 0.1 for problem statement
+SKID_PROBABILITY: float = 0.3   # 0.1 for problem statement
 
 LEARNING_EPISODES: int = 100_000
-EPISODE_MEASUREMENT_FREQUENCY: int = 1_000
+PERFORMANCE_SAMPLE_START: int = 1000
+PERFORMANCE_SAMPLE_FREQUENCY: int = 1000
+PERFORMANCE_SAMPLES: int = 100
