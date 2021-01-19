@@ -108,7 +108,7 @@ class Environment:
         elif square == enums.Square.GRASS:
             # failure, move back to start line
             # self.pre_reset_state = state.State(x, y, vx, vy, is_reset=True)
-            reward = -1.0
+            reward = -1.0 + constants.EXTRA_REWARD_FOR_FAILURE
             state_ = self.get_a_start_state()
             if self.verbose:
                 self.trace_.output()

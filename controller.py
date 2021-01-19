@@ -33,7 +33,7 @@ class Controller:
         self.view = view.View(self.racetrack)
 
     def run(self):
-        self.algorithm_.run(100_000)
+        self.algorithm_.run(constants.LEARNING_EPISODES)
         self.output_q()
 
         self.agent.set_policy(self.target_policy)
